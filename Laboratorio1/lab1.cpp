@@ -16,37 +16,25 @@ double x[] = { 1.0, 2.1, 3.0, 5.1, 2.0, 0.0, 6.2, 7.3 };
 const int No = sizeof(o) / sizeof(o[0]);
 const int Nx = sizeof(x) / sizeof(x[0]);
 
-// La distancia euclidiana entre dos puntos, en un espacio de 'n' dimensiones,
-// es la raiz cuadrada de la suma de los cuadrados de las 'n' diferencias
-// de las coordenadas correspondientes de esos puntos
-// https://es.wikipedia.org/wiki/Distancia_euclidiana
-
 // 'distance': computa la distancia euclidiana de dos vectores de 'n' dimensiones
-// 'n': número de dimensiones
-// 'v': vector de 'n' dimensiones
-// 'w': otro vector de 'n' dimensiones
-// la función retorna la distancia euclidiana entre 'v' y 'w'
 double distance(int n, double v[], double w[]) {
-    double result;
+    double sum_sq = 0.0;
+    for (int i = 0; i < n; ++i) {
+        double d = v[i] - w[i];
+        sum_sq += d * d;
+    }
+    double result = std::sqrt(sum_sq);
     return result;
 }
 
-
 // 'vec_sum': calcula la suma de dos vectores de 'n' dimensiones
-// asumimos que ya conocen la definición de la suma de dos vectores
-// Parámetros:
-// 'n': número de dimensiones
-// 'v': vector de 'n' dimensiones
-// 'w': otro vector de 'n' dimensiones
-// 'r': vector de la suma de 'v' y 'w' (con memoria ya reservada para 'n' dimensiones)
-// la función retorna el resultado en 'r'
 void vec_sum(int n, double v[], double w[], double r[]) {
+    for (int i = 0; i < n; ++i) {
+        r[i] = v[i] + w[i];
+    }
 }
 
 // 'show' muestra un vector 'v', de 'n' dimensiones, en la pantalla
-// 'n': número de dimensiones
-// 'v': vector de 'n' dimensiones
-// 'sep': separador para mejorar la salida
 void show(int n, double v[], const char *sep) {
     fprintf(stdout, "[ ");
     for (int i = 0; i < n; ++i) {
@@ -56,20 +44,17 @@ void show(int n, double v[], const char *sep) {
 }
 
 // 'min' retorna el índice del menor valor en un subrango de un arreglo
-// 'i': índice del comienzo del subrango (incluido)
-// 'n': índice del final del subrango (excluido)
-// 'a': arreglo con los datos
-// la función retorna el índice del menor valor en el subrango [ a[i] .. a[n] )
 int min(int i, int n, double a[]) {
-    double min;
-    return min;
+    int k = i; // índice del mínimo actual
+    for (int j = i + 1; j < n; ++j) {
+        if (a[j] < a[k]) {
+            k = j;
+        }
+    }
+    return k;
 }
 
 // 'copy_array': copia un arreglo a otro
-// 'n', tamaño del arreglo
-// 'a', arreglo con datos
-// 'r', arreglo para almacenar la copia (con memoria ya reservada para 'n' elementos)
-// la función retorna el resultado (la copia de 'a') en 'r'
 void copy_array(int n, double a[], double r[]) {
     for (int i = 0; i < n; ++i) {
         r[i] = a[i];
@@ -77,31 +62,37 @@ void copy_array(int n, double a[], double r[]) {
 }
 
 // 'sort': ordena un arreglo 'a', de tamaño 'n' dejando el resultado en otro arreglo
-// 'n', tamaño del arreglo
-// 'a', arreglo con datos
-// 'r', arreglo para almacenar la resultado (con memoria ya reservada para 'n' elementos)
-// la función retorna el arreglo ordenado en 'r'
 void sort(const int n, double a[], double r[]) {
-    // @@@ completar usando el algoritmo aqui descrito @@@
+    // Primero copiamos 'a' a 'r' (para no modificar el original)
+    copy_array(n, a, r);
 
-    // 1. conseguir el valor minimo en todo el arreglo 'r', es decir en el rango 'r[0]' .. 'r[n-1]'
-    // recuerden: los índices válidos del arreglo van de 0 a 'n' excluido
-    // por eso lo típico es iterar como lo hacemo en 'show': 'for (int l = 0; l < n; ++l)'
-    // 2. sea 'k' el indice del valor minimo: intercambie 'r[0]' con 'r[k]'
-    // ahora el valor minimo de 'r' esta en 'r[0]' y se va a quedar alli para siempre.
-    // Repetir 1 y 2 *pero* en el rango r[1] .. r[n-1], es decir los indices de 1 a n excluido
-    // e intercambiando el valor minimo en ese rango con 'r[1]', lógicamente.
-    // Y asi sucesivamente
+    // Selection sort usando min(i, n, r)
+    for (int i = 0; i < n; ++i) {
+        int k = min(i, n, r);     // índice del mínimo en el rango [i, n)
+        // intercambiar r[i] con r[k]
+        double tmp = r[i];
+        r[i] = r[k];
+        r[k] = tmp;
+    }
 }
 
 // Lo mismo que `sort`, solo que usando inteligencia artificial.
-// Indiquen en un comentario cual inteligencia artificial usaron.
-// Indiquen en un comentario si les dio algun insight que consideren valioso.
 void sort_AI(const int n, double a[], double r[]) {
+    // IA usada: ChatGPT (OpenAI).
+    // Insight: implementar selection sort copiando primero el arreglo para no mutar el original
+    // y reutilizar min(i,n,r) para hacer el código más claro.
+
+    copy_array(n, a, r);
+
+    for (int i = 0; i < n; ++i) {
+        int k = min(i, n, r);
+        double tmp = r[i];
+        r[i] = r[k];
+        r[k] = tmp;
+    }
 }
 
 // recomendamos que escriban sus propias pruebas
-// los preparadores van a probar su código.
 void test_distance() {
     fprintf(stdout, "test_distance\n");
 
@@ -130,7 +121,6 @@ void test_vec_sum() {
 
 void test_sort() {
     fprintf(stdout, "test_sort\n");
-    // aqui reservamos memoria para almacenar el resultado de ordenar a x
     double r[Nx];
     sort(Nx, x, r);
     show(Nx, x, " ");
